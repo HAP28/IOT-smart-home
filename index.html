@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home IoT Project</title>
+    <style>
+ body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #DFF5FF; /* Light blue background */
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #378CE7; /* Heading value color */
+            margin-top: 0;
+            font-size: 24px;
+        }
+
+        #data-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #5356FF; /* Initial numerical data color */
+             /* Animation applied to all paragraphs */
+        }
+        span{
+            animation: fadeIn 1s ease-out;
+            color: red!important;
+        }
+        /* Animation */
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .changed {
+            animation: dataChange 1s ease-out;
+        }
+
+        @keyframes dataChange {
+            0% { color: green; }
+            50% { color: blue; }
+            100% { color: #5356FF; } /* Numerical data color */
+        }
+
+        @media screen and (max-width: 600px) {
+            .container {
+                width: 95%;
+                margin: 10px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container fade-in">
+        <h1>Smart Home IoT Project</h1>
+    
+        <div id="data-container">
+            <!-- Data will be displayed here -->
+        </div>
+    </div>
+<script>
+// Function to fetch data from the API
+function fetchData() {
+    let previousData = null;
+
+    // Replace 'YOUR_API_ENDPOINT' with the actual API endpoint
+    const apiUrl = 'https://api.thingspeak.com/channels/2465340/feeds.json?api_key=O0856XX8MZ280NPO&results=2';
+
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data['feeds'][0])
+            // // Update the HTML content with the fetched data
+            // document.getElementById('data-container').innerHTML = `
+            //     <p><b>Soil Moisture: </b> <code> ${data['feeds'][0]['field1']} </code></p>
+            //     <p><b>Temperature: </b> <code> ${data['feeds'][0]['field2']} </code></p>
+            //     <p><b>Humidity: </b> <code>${data['feeds'][0]['field3']} </code></p>
+            // `;
+
+            if (previousData !== null && JSON.stringify(data['feeds'][0]) !== JSON.stringify(previousData)) {
+                    document.getElementById('data-container').innerHTML = `
+                        <h3>Soil Moisture: <span class="changed" style="color: #5356FF;">${data['feeds'][0]['field1']}</span></h3>
+                        <h3>Humidity: <span class="changed" style="color: #5356FF;">${data['feeds'][0]['field3']}</span></h3>
+                        <h3>Temperature: <span class="changed" style="color: #5356FF;">${data['feeds'][0]['field2']}</span></h3>
+                    `;
+                    setTimeout(() => {
+                        document.querySelectorAll('.changed').forEach(el => {
+                            el.classList.remove('changed');
+                        });
+                    }, 1000);
+                } else {
+                    document.getElementById('data-container').innerHTML = `
+                        <h3>Soil Moisture: <span style="color: #5356FF;">${data['feeds'][0]['field1']}</span></h3>
+                        <h3>Humidity: <span style="color: #5356FF;">${data['feeds'][0]['field3']}</span></h3>
+                        <h3>Temperature: <span style="color: #5356FF;">${data['feeds'][0]['field2']}</span></h3>
+                    `;
+                }
+                previousData = data['feeds'][0];
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+}
+
+// Fetch data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    fetchData();
+    // Fetch data every 5 seconds
+    setInterval(fetchData, 2000); // 5000 milliseconds = 5 seconds
+});
+
+</script>
+
+</body>
+</html>
